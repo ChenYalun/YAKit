@@ -8,10 +8,14 @@
 
 #import <Foundation/Foundation.h>
 #import <Photos/Photos.h>
+typedef NS_OPTIONS(NSUInteger, YAPickMediaType) {
+    YAPickMediaTypeImage    = 1 << 0, // 照片
+    YAPickMediaTypeVideo    = 1 << 1, // 视频
+};
 
 @interface YAPhotoManager: NSObject
 // 弹出相册照片选择控制器且用户选中图片后, 该回调将被调用
-@property (nonatomic, copy) void (^pickImageCompletion) (UIImage *image);
+@property (nonatomic, copy) void (^pickImageCompletion) (UIImage *image, NSURL *videoURL);
 
 /**
  请求相册访问权限并读取相册图片
@@ -23,11 +27,13 @@
                                 authorizedBlock:(void (^)(PHFetchResult <PHAsset *> *allPhotos))authorizedBlock;
 
 /**
- 弹出相册照片选择控制器
+ 弹出相册选择控制器
 
  @param controller 当前控制器
+ @param mediaType 媒体类型
  */
-- (void)presentPickerControllerInViewController:(UIViewController *)controller;
+- (void)presentPickerControllerInViewController:(UIViewController *)controller
+                                      mediaType:(YAPickMediaType)mediaType;
 
 /**
  保存图片到相机胶卷

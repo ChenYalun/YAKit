@@ -34,10 +34,19 @@
     }
 }
 
-- (void)presentPickerControllerInViewController:(UIViewController *)controller {
+- (void)presentPickerControllerInViewController:(UIViewController *)controller
+                                      mediaType:(YAPickMediaType)mediaType{
     UIImagePickerController *pickerController= [[UIImagePickerController alloc] init];
     pickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
     pickerController.delegate = self;
+    NSMutableArray *types = [NSMutableArray array];
+    if ((mediaType & YAPickMediaTypeImage) == YAPickMediaTypeImage) {
+        [types addObject:(NSString *)kUTTypeImage];
+    }
+    if ((mediaType & YAPickMediaTypeVideo) == YAPickMediaTypeVideo) {
+        [types addObject:(NSString *)kUTTypeMovie];
+    }
+    pickerController.mediaTypes = types;
     [controller presentViewController:pickerController animated:YES completion:nil];
 }
 
@@ -112,7 +121,15 @@
 #pragma mark - Image Picker Controller Delegate
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary <NSString *,id> *)info {
     [picker dismissViewControllerAnimated:YES completion:nil];
-    UIImage *pickImage = info[UIImagePickerControllerOriginalImage];
-    if (self.pickImageCompletion) self.pickImageCompletion(pickImage);
+    UIImage *pickImage = nil;
+    NSURL *videoURL = nil;
+    NSString *mediaType = [info objectForKey:UIImagePickerControllerMediaType];
+    if ([mediaType isEqualToString:@"public.image"]) {
+        pickImage = info[UIImagePickerControllerOriginalImage];
+    }
+    if ([mediaType isEqualToString:@"public.movie"]) {
+        videoURL = info[UIImagePickerControllerMediaURL];
+    }
+    if (self.pickImageCompletion) self.pickImageCompletion(pickImage, videoURL);
 }
 @end
