@@ -18,9 +18,3 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 NS_ASSUME_NONNULL_END
-
-/*
-YAWeakProxy *proxy = [YAWeakProxy proxyWithTarget:self];
-self.timer = [NSTimer timerWithTimeInterval:1 target:proxy selector:@selector(print) userInfo:nil repeats:YES];
-[NSRunLoop.mainRunLoop addTimer:self.timer forMode:NSRunLoopCommonModes];
-*/
