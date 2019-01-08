@@ -29,4 +29,21 @@
  */
 + (UIImage *)loadCacheLargeImageWithContentsOfFile:(NSString *)imagePath
                                       forImageView:(UIImageView *)imageView;
+
+/**
+ 优雅地旋转图片
+
+ @param oldImage 原始图片
+ @param orientation 旋转方向
+ @return 旋转后的图片
+ */
++ (UIImage *)rotateImage:(UIImage *)oldImage orientation:(UIImageOrientation)orientation;
+
+/**
+ 获取镜像图片
+
+ @param originImage 原始图片
+ @return 镜像图片
+ */
++ (UIImage *)mirroredImage:(UIImage *)originImage;
 @end
