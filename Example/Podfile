@@ -1,0 +1,16 @@
+#source 'https://github.com/ChenYalun/YAKit.git'
+#source 'https://github.com/CocoaPods/Specs.git'
+
+use_frameworks!
+
+platform :ios, '10.0'
+
+target 'YAKit_Example' do
+
+  pod 'YAKit', :subspecs => ['Category', 'Utility', 'General', 'ThirdParty'], :git => 'https://github.com/ChenYalun/YAFoundation.git'
+
+  target 'YAKit_Tests' do
+    inherit! :search_paths
+
+  end
+end

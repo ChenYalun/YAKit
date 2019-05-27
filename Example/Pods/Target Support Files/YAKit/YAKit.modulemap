@@ -1,0 +1,6 @@
+framework module YAKit {
+  umbrella header "YAKit-umbrella.h"
+
+  export *
+  module * { export * }
+}

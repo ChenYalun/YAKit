@@ -1,0 +1,48 @@
+PODS:
+  - AFNetworking (3.1.0):
+    - AFNetworking/NSURLSession (= 3.1.0)
+    - AFNetworking/Reachability (= 3.1.0)
+    - AFNetworking/Security (= 3.1.0)
+    - AFNetworking/Serialization (= 3.1.0)
+    - AFNetworking/UIKit (= 3.1.0)
+  - AFNetworking/NSURLSession (3.1.0):
+    - AFNetworking/Reachability
+    - AFNetworking/Security
+    - AFNetworking/Serialization
+  - AFNetworking/Reachability (3.1.0)
+  - AFNetworking/Security (3.1.0)
+  - AFNetworking/Serialization (3.1.0)
+  - AFNetworking/UIKit (3.1.0):
+    - AFNetworking/NSURLSession
+  - YAKit/Category (0.2.0)
+  - YAKit/General (0.2.0)
+  - YAKit/ThirdParty (0.2.0)
+  - YAKit/Utility (0.2.0):
+    - AFNetworking (~> 3.1.0)
+
+DEPENDENCIES:
+  - YAKit/Category (from `https://github.com/ChenYalun/YAFoundation.git`)
+  - YAKit/General (from `https://github.com/ChenYalun/YAFoundation.git`)
+  - YAKit/ThirdParty (from `https://github.com/ChenYalun/YAFoundation.git`)
+  - YAKit/Utility (from `https://github.com/ChenYalun/YAFoundation.git`)
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - AFNetworking
+
+EXTERNAL SOURCES:
+  YAKit:
+    :git: https://github.com/ChenYalun/YAFoundation.git
+
+CHECKOUT OPTIONS:
+  YAKit:
+    :commit: cd044a598be6271c11f12d740ba9e3cced852b37
+    :git: https://github.com/ChenYalun/YAFoundation.git
+
+SPEC CHECKSUMS:
+  AFNetworking: 5e0e199f73d8626b11e79750991f5d173d1f8b67
+  YAKit: 9b2afe31465fdcb351a48676ea228da1344c4dda
+
+PODFILE CHECKSUM: 7b8eb345f0a567d80c126a8fef9389b9d1eedf28
+
+COCOAPODS: 1.6.1

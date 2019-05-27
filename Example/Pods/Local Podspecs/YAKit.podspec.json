@@ -1,0 +1,45 @@
+{
+  "name": "YAKit",
+  "version": "0.2.0",
+  "summary": "YAKit",
+  "description": "The Basic components.",
+  "homepage": "https://github.com/ChenYalun/YAKit",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "ChenYalun": "iChenyalun@gmail.com"
+  },
+  "source": {
+    "git": "https://github.com/ChenYalun/YAFoundation.git",
+    "tag": "0.2.0"
+  },
+  "social_media_url": "https://weibo.com/icqk",
+  "platforms": {
+    "ios": "10.0"
+  },
+  "subspecs": [
+    {
+      "name": "Category",
+      "source_files": "YAKit/Classes/Category/**/*"
+    },
+    {
+      "name": "General",
+      "source_files": "YAKit/Classes/General/**/*"
+    },
+    {
+      "name": "Utility",
+      "source_files": "YAKit/Classes/Utility/**/*",
+      "dependencies": {
+        "AFNetworking": [
+          "~> 3.1.0"
+        ]
+      }
+    },
+    {
+      "name": "ThirdParty",
+      "source_files": "YAKit/Classes/ThirdParty/**/*"
+    }
+  ]
+}
