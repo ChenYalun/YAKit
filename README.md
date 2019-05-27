@@ -17,9 +17,12 @@ YAKit is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'YAKit'
+pod 'YAKit', :git => 'https://github.com/ChenYalun/YAKit.git'
+```
 
-pod 'YAKit', :subspecs => ['Category', 'Utility', 'General', 'ThirdParty'], :git => 'https://github.com/ChenYalun/YAKit.git'
+
+```ruby
+pod 'YAKit', :subspecs => ['General', 'Category', 'Utility', 'ThirdParty'], :git => 'https://github.com/ChenYalun/YAKit.git'
 ```
 
 ## Author
@@ -29,3 +32,5 @@ ChenYalun, iChenYalun@gmail.com
 ## License
 
 YAKit is available under the MIT license. See the LICENSE file for more info.
+
+
