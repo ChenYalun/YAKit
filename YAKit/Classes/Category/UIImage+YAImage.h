@@ -46,4 +46,12 @@
  @return 镜像图片
  */
 + (UIImage *)mirroredImage:(UIImage *)originImage;
+
+/**
+ 高性能获取缩略图
+
+ @param size 目标尺寸
+ @return 缩略图
+ */
+- (UIImage *)thumbnailImageForSize:(CGSize)size;
 @end

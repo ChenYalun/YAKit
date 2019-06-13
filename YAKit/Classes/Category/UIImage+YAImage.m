@@ -142,4 +142,22 @@
     UIImage *newImage = [UIImage imageWithCGImage:originImage.CGImage scale:originImage.scale orientation:UIImageOrientationUpMirrored];
     return [newImage fixedRotation];
 }
+
+- (UIImage *)thumbnailImageForSize:(CGSize)size {
+    if (!self || size.width <= 0 || size.height <= 0) return nil;
+    CGFloat maxPixelSize = MAX(size.width, size.height);
+    NSData *data = UIImagePNGRepresentation(self);
+    CGImageSourceRef sourceRef = CGImageSourceCreateWithData((__bridge CFDataRef)data, nil);
+    CFDictionaryRef options = (__bridge CFDictionaryRef) @{
+                                                           (id) kCGImageSourceCreateThumbnailWithTransform : @YES,
+                                                           (id) kCGImageSourceCreateThumbnailFromImageAlways : @YES,
+                                                           (id) kCGImageSourceThumbnailMaxPixelSize : @(maxPixelSize)
+                                                           };
+    CGImageRef imageRef = CGImageSourceCreateThumbnailAtIndex(sourceRef, 0, options);
+    if (!imageRef) return nil;
+    UIImage *result = [UIImage imageWithCGImage:imageRef scale:self.scale orientation:self.imageOrientation];
+    CGImageRelease(imageRef);
+    if (sourceRef) CFRelease(sourceRef);
+    return result;
+}
 @end
