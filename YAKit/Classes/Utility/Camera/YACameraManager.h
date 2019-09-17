@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
+#import <UIKit/UIKit.h>
 
 @interface YACameraManager : NSObject
 // 是否有相机权限
@@ -20,6 +21,7 @@
 @property (nonatomic, strong) UIView *previewView;
 
 + (instancetype)sharedManager;
+// 回调在子线程
 - (void)requestAccessForVideoTypeWithDeniedBlock:(void (^)(void))deniedBlock
                                  authorizedBlock:(void (^)(void))authorizedBlock;
 // 设置前摄像头

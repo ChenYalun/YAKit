@@ -8,16 +8,24 @@
 
 
 #import "YACameraManager.h"
+
 #define kFocusViewWidthHeight 30 // 对焦视图宽高
 
-@interface YACameraManager() <AVCaptureMetadataOutputObjectsDelegate, UIGestureRecognizerDelegate>
+@interface YACameraManager() <AVCaptureMetadataOutputObjectsDelegate, AVCaptureVideoDataOutputSampleBufferDelegate, UIGestureRecognizerDelegate>
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 @property (nonatomic, strong) AVCaptureDevice *device;
 @property (nonatomic, strong) AVCaptureDeviceInput *input;
-@property (nonatomic, strong) AVCaptureMetadataOutput *output;
+@property (nonatomic, strong) AVCaptureMetadataOutput *metaOutput;
+@property (nonatomic) dispatch_queue_t metadataQueue;
+
+@property (nonatomic, strong) AVCaptureVideoDataOutput *videoOutput;
+@property (nonatomic) dispatch_queue_t sampleBufferQueue;
+
 @property (nonatomic, strong) AVCaptureStillImageOutput *imageOutput;
 @property (nonatomic, strong) AVCaptureSession *session;
+
+
 @property (nonatomic, strong) UIButton *focusView;
 @property (nonatomic, strong) AVCaptureVideoPreviewLayer *previewLayer;
 // 开始的缩放比例
@@ -48,15 +56,18 @@
         _input = [[AVCaptureDeviceInput alloc] initWithDevice:_device error:nil];
         // Session.
         _session = [[AVCaptureSession alloc] init];
-        // Output.
-        _output = [[AVCaptureMetadataOutput alloc] init];
+        // video output.
+        [self configVideoDataOutput];
         // Image output.
         _imageOutput = [[AVCaptureStillImageOutput alloc] init];
         if ([_session canSetSessionPreset:AVCaptureSessionPreset1280x720]) {
             _session.sessionPreset = AVCaptureSessionPreset1280x720;
         }
-        if ([_session canAddInput:self.input]) [_session addInput:_input];
+        if ([_session canAddInput:_input]) [_session addInput:_input];
         if ([_session canAddOutput:_imageOutput]) [_session addOutput:_imageOutput];
+        // meta output.
+        [self configMetaDataOutout];
+        
         _previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:_session];
         _previewLayer.frame = UIScreen.mainScreen.bounds;
         _previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
@@ -85,6 +96,35 @@
         [_previewView addSubview:_focusView];
     }
     return self;
+}
+
+
+- (void)configMetaDataOutout {
+    _metadataQueue = dispatch_queue_create("com.chenyalun.camera.metadata", DISPATCH_QUEUE_SERIAL);
+    _metaOutput = [[AVCaptureMetadataOutput alloc] init];
+    if ([_session canAddOutput:_metaOutput]) [_session addOutput:_metaOutput];
+    [_metaOutput setMetadataObjectsDelegate:self queue:_metadataQueue];
+    NSArray *available = _metaOutput.availableMetadataObjectTypes;
+    NSArray *demand = @[AVMetadataObjectTypeUPCECode, AVMetadataObjectTypeCode39Code,AVMetadataObjectTypeEAN13Code, AVMetadataObjectTypeEAN8Code, AVMetadataObjectTypeCode93Code, AVMetadataObjectTypePDF417Code,AVMetadataObjectTypeAztecCode,AVMetadataObjectTypeCode128Code, AVMetadataObjectTypeInterleaved2of5Code, AVMetadataObjectTypeITF14Code,AVMetadataObjectTypeDataMatrixCode,AVMetadataObjectTypeQRCode];
+    NSMutableArray *valideTypes = [NSMutableArray new];
+    for (AVMetadataObjectType atype in available) {
+        for (AVMetadataObjectType dtype in demand) {
+            if ([atype isEqualToString:dtype]) {
+                [valideTypes addObject:dtype];
+          }
+        }
+    }
+    _metaOutput.metadataObjectTypes = valideTypes;
+}
+
+- (void)configVideoDataOutput {
+    _sampleBufferQueue = dispatch_queue_create("com.chenyalun.camera.buffer", DISPATCH_QUEUE_SERIAL);
+    _videoOutput = [[AVCaptureVideoDataOutput alloc] init];
+    NSDictionary *settings = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInt:kCVPixelFormatType_32BGRA], kCVPixelBufferPixelFormatTypeKey, nil];
+    _videoOutput.videoSettings = settings;
+    _videoOutput.alwaysDiscardsLateVideoFrames = YES;
+    [_videoOutput setSampleBufferDelegate:self queue:_sampleBufferQueue];
+    if ([_session canAddOutput:_videoOutput]) [_session addOutput:_videoOutput];
 }
 
 #pragma mark - Public methods
@@ -175,6 +215,10 @@
 
 #pragma mark - Delegate
 - (void)captureOutput:(AVCaptureOutput *)output didOutputMetadataObjects:(NSArray<__kindof AVMetadataObject *> *)metadataObjects fromConnection:(AVCaptureConnection *)connection {
+    
+}
+
+- (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
     
 }
 
