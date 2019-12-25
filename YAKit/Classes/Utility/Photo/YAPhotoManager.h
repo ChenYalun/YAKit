@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <Photos/Photos.h>
+#import <UIKit/UIKit.h>
 
 typedef NS_OPTIONS(NSUInteger, YAPickMediaType) {
     YAPickMediaTypeImage    = 1 << 0, // 照片
@@ -37,7 +38,7 @@ typedef NS_OPTIONS(NSUInteger, YAPickMediaType) {
                                       mediaType:(YAPickMediaType)mediaType;
 
 /**
- 保存图片到相机胶卷
+ 保存图片到相机胶卷(要求子线程)
 
  @param image 图片
  @return Asset对象集合
@@ -45,12 +46,23 @@ typedef NS_OPTIONS(NSUInteger, YAPickMediaType) {
 + (PHFetchResult <PHAsset *> *)saveImageIntoDefaultAlbum:(UIImage *)image;
 
 /**
- 保存图片到以App name为名称的相册
+ 保存图片到以App name为名称的相册(要求子线程)
 
  @param image 图片
  @return Asset对象集合
  */
 + (PHFetchResult <PHAsset *> *)saveImageIntoCustomAlbum:(UIImage *)image;
+
+/**
+ 异步保存图片到相册
+ 
+ @param image 图片
+ @param albumName 相册名称
+ @param completion 回调
+*/
++ (void)asyncSaveImage:(UIImage *)image
+               toAlbum:(NSString *)albumName
+            completion:(void (^)(BOOL))completion;
 
 /**
  获取相机胶卷中最近的几张照片

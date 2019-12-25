@@ -120,6 +120,96 @@
     }];
 }
 
++ (void)asyncSaveImage:(UIImage *)image
+               toAlbum:(NSString *)albumName
+            completion:(void (^)(BOOL))completion {
+    // 最终的方法回调
+    void (^finishCallBack)(BOOL) = ^(BOOL success) {
+        // 在主线程回调
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (completion) completion(success);
+        });
+    };
+    
+    void (^block)(void) = ^() {
+        [self asyncSaveImageIntoDefaultAlbum:image completion:^(PHFetchResult<PHAsset *> *assets) {
+            [self asyncGetCustomAlbumWithName:albumName completion:^(PHAssetCollection *customAlbum) {
+                if (!assets || !customAlbum) { // 不存在不保存
+                    finishCallBack(NO);
+                    return ;
+                }
+                // 将默认相册中的assets添加到自定义相册
+                [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                    PHAssetCollectionChangeRequest *collectionChangeRequest = [PHAssetCollectionChangeRequest changeRequestForAssetCollection:customAlbum];
+                    [collectionChangeRequest addAssets:assets];
+                } completionHandler:^(BOOL success, NSError * _Nullable error) {
+                    finishCallBack(success);
+                }];
+            }];
+        }];
+    };
+    
+    // 鉴权
+    switch (PHPhotoLibrary.authorizationStatus) {
+        case PHAuthorizationStatusNotDetermined: {
+            // 无权限则请求权限
+            [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
+                if (status == PHAuthorizationStatusAuthorized) block();
+                else if (completion) completion(NO);
+            }];
+        } break;
+        case PHAuthorizationStatusAuthorized: {
+            block();
+        } break;
+        default: {
+            if (completion) completion(NO);
+        } break;
+    }
+}
+
+#pragma mark - Private methods
+// 保存照片到默认相册(未做权限判断, 不可暴露; 回调在子线程)
++ (void)asyncSaveImageIntoDefaultAlbum:(UIImage *)image
+                            completion:(void (^)(PHFetchResult<PHAsset *> *))completion {
+    __block NSString *assetID = nil;
+    [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+        assetID = [PHAssetChangeRequest             creationRequestForAssetFromImage:image].placeholderForCreatedAsset.localIdentifier;
+    } completionHandler:^(BOOL success, NSError * _Nullable error) {
+        if (assetID && success && completion) {
+            completion([PHAsset fetchAssetsWithLocalIdentifiers:@[assetID] options:nil]);
+        } else if (completion) {
+            completion(nil);
+        }
+    }];
+}
+
+// 获取自定义相册(未做权限判断, 不可暴露; 回调在子线程)
++ (void)asyncGetCustomAlbumWithName:(NSString *)albumName
+                         completion:(void (^)(PHAssetCollection *))completion {
+    if (!completion) return; // 没有回调直接返回
+    // 自定义相册
+    PHFetchOptions *option = [[PHFetchOptions alloc] init];
+    option.predicate = [NSPredicate predicateWithFormat:@"localizedTitle contains %@", albumName];
+    PHAssetCollection *customAlbum = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumRegular options:option].firstObject;
+    if (customAlbum) {  // 相册已经存在直接返回
+        completion(customAlbum);
+        return;
+    }
+    
+    // 没有找到则创建
+    __block NSString *createID = nil;
+    [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+        PHAssetCollectionChangeRequest *request = [PHAssetCollectionChangeRequest creationRequestForAssetCollectionWithTitle:albumName];
+        createID = request.placeholderForCreatedAssetCollection.localIdentifier;
+    } completionHandler:^(BOOL success, NSError * _Nullable error) {
+        PHAssetCollection *customAlbum = nil;
+        if (success && createID) {
+            customAlbum = [PHAssetCollection fetchAssetCollectionsWithLocalIdentifiers:@[createID] options:nil].firstObject;
+        }
+        completion(customAlbum);
+    }];
+}
+
 #pragma mark - Image Picker Controller Delegate
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary <NSString *,id> *)info {
     [picker dismissViewControllerAnimated:YES completion:nil];
@@ -133,5 +223,95 @@
         videoURL = info[UIImagePickerControllerMediaURL];
     }
     if (self.pickImageCompletion) self.pickImageCompletion(pickImage, videoURL);
+}
+
++ (void)mis_saveImage:(UIImage *)image
+              toAlbum:(NSString *)albumName
+           completion:(void (^)(BOOL))completion {
+    // 最终的方法回调
+    void (^finishCallBack)(BOOL) = ^(BOOL success) {
+        // 在主线程回调
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (completion) completion(success);
+        });
+    };
+    
+    void (^block)(void) = ^() {
+        [self mis_saveImageIntoDefaultAlbum:image completion:^(PHFetchResult<PHAsset *> *assets) {
+            [self mis_getCustomAlbumWithName:albumName completion:^(PHAssetCollection *customAlbum) {
+                if (!assets || !customAlbum) { // 不存在不保存
+                    finishCallBack(NO);
+                    return ;
+                }
+                // 将默认相册中的assets添加到自定义相册
+                [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                    PHAssetCollectionChangeRequest *collectionChangeRequest = [PHAssetCollectionChangeRequest changeRequestForAssetCollection:customAlbum];
+                    [collectionChangeRequest addAssets:assets];
+                } completionHandler:^(BOOL success, NSError * _Nullable error) {
+                    finishCallBack(success);
+                }];
+            }];
+        }];
+    };
+    
+    // 鉴权
+    switch (PHPhotoLibrary.authorizationStatus) {
+        case PHAuthorizationStatusNotDetermined: {
+            // 无权限则请求权限
+            [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
+                if (status == PHAuthorizationStatusAuthorized) block();
+                else if (completion) completion(NO);
+            }];
+        } break;
+        case PHAuthorizationStatusAuthorized: {
+            block();
+        } break;
+        default: {
+            if (completion) completion(NO);
+        } break;
+    }
+}
+
+#pragma mark - Private methods
+// 保存照片到默认相册(未做权限判断, 不可暴露; 回调在子线程)
++ (void)mis_saveImageIntoDefaultAlbum:(UIImage *)image
+                           completion:(void (^)(PHFetchResult<PHAsset *> *))completion {
+    __block NSString *assetID = nil;
+    [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+        assetID = [PHAssetChangeRequest             creationRequestForAssetFromImage:image].placeholderForCreatedAsset.localIdentifier;
+    } completionHandler:^(BOOL success, NSError * _Nullable error) {
+        if (assetID && success && completion) {
+            completion([PHAsset fetchAssetsWithLocalIdentifiers:@[assetID] options:nil]);
+        } else if (completion) {
+            completion(nil);
+        }
+    }];
+}
+
+// 获取自定义相册(未做权限判断, 不可暴露; 回调在子线程)
++ (void)mis_getCustomAlbumWithName:(NSString *)albumName
+                        completion:(void (^)(PHAssetCollection *))completion {
+    if (!completion) return; // 没有回调直接返回
+    // 自定义相册
+    PHFetchOptions *option = [[PHFetchOptions alloc] init];
+    option.predicate = [NSPredicate predicateWithFormat:@"localizedTitle contains %@", albumName];
+    PHAssetCollection *customAlbum = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumRegular options:option].firstObject;
+    if (customAlbum) {  // 相册已经存在直接返回
+        completion(customAlbum);
+        return;
+    }
+    
+    // 没有找到则创建
+    __block NSString *createID = nil;
+    [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+        PHAssetCollectionChangeRequest *request = [PHAssetCollectionChangeRequest creationRequestForAssetCollectionWithTitle:albumName];
+        createID = request.placeholderForCreatedAssetCollection.localIdentifier;
+    } completionHandler:^(BOOL success, NSError * _Nullable error) {
+        PHAssetCollection *customAlbum = nil;
+        if (success && createID) {
+            customAlbum = [PHAssetCollection fetchAssetCollectionsWithLocalIdentifiers:@[createID] options:nil].firstObject;
+        }
+        completion(customAlbum);
+    }];
 }
 @end

@@ -29,7 +29,7 @@
 }
 
 + (YANetworkManager *)sharedManager {
-    return [YANetworkManager sharedManager];
+    return [YANetworkManager shareMananger];
 }
 
 #pragma mark - Public methods
